@@ -294,5 +294,5 @@ SuperSafe is a secure and comprehensive digital wallet for the SuperSeed network
 
 ---
 
-*Documentation created on August 1, 2023*  
-*Last update: August 1, 2023* 
+*Documentation created on April 23, 2025*  
+*Last update: April 23, 2025*
