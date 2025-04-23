@@ -1,65 +1,170 @@
 # SuperSafe Wallet
 
-Una extensión de billetera minimalista para la blockchain SuperSeed, compatible con redes EVM.
+![SuperSafe Logo](public/logo.png)
 
-## Características
+A secure digital wallet for managing assets on the SuperSeed blockchain, with an architecture focused on security and user experience.
 
-- **Multi-red**: Compatible con SuperSeed Mainnet (ID Cadena 5330) y Devnet Sepolia (ID Cadena 53302).
-- **Gestión de cuentas**: Importa billeteras usando frase semilla o clave privada, con la capacidad de asignar un alias personalizado.
-- **Mostrar saldos**: Muestra saldos de ETH nativo y tokens ERC-20 predeterminados (USDC y USDT) para la cuenta seleccionada.
-- **Transacciones recientes**: Muestra las últimas 10 transacciones (enviadas o recibidas) para la billetera activa.
-- **Transferencias de tokens**: Permite enviar ETH o cualquier token ERC-20 agregado a otra dirección.
-- **Tokens personalizados**: Permite agregar manualmente contratos de tokens ERC-20 personalizados para rastrear tokens adicionales.
-- **Integración con Explorer**: Proporciona un enlace para ver la dirección de la billetera actual en el explorador SuperSeed.
-- **Almacenamiento seguro**: Almacena de forma segura los datos sensibles (claves privadas, frases semilla) en el navegador utilizando cifrado fuerte (AES-GCM).
+## 🚀 Key Features
 
-## Tecnologías
+- **Multi-network**: Compatible with SuperSeed Mainnet (ID 5330) and Devnet Sepolia (ID 53302)
+- **Account management**: Import or create wallets using seed phrase or private key
+- **Asset management**: View and transfer ETH and ERC-20 tokens
+- **Transactions**: Send, receive, and monitor transactions
+- **Advanced security**: AES-GCM encryption with PBKDF2 key derivation
+- **Local storage**: Encrypted sensitive data stored locally
+- **Customization**: Configure security options according to your preferences
+- **Custom token support**: Add any ERC-20 token to your wallet
 
-- React
-- TailwindCSS
-- Vite
-- ethers.js
-- IndexedDB (idb)
+## 🔒 Security
 
-## Desarrollo
+SuperSafe implements a multi-layer security model designed to protect users' private keys:
 
-### Requisitos previos
+- **User custody**: Private keys remain under the exclusive control of the user
+- **End-to-end encryption**: All sensitive keys are encrypted locally
+- **Zero knowledge**: The application cannot access keys without the user's password
+- **Defense in depth**: Multiple security layers operate simultaneously
 
-- Node.js 14 o superior
-- npm 7 o superior
+For more security details, check [SECURITY.md](SECURITY.md).
 
-### Configuración
+## 🏗️ Architecture
 
-1. Clona este repositorio:
+SuperSafe uses a client-centered architecture where all critical operations are performed locally in the user's browser:
+
 ```
++-------------------------------------------+    +-------------------------+
+|               USER'S BROWSER              |    |      BLOCKCHAIN         |
++-------------------------------------------+    +-------------------------+
+|                                           |    |                         |
+|  +-------------+      +---------------+   |    |                         |
+|  |             |      |               |   |    |                         |
+|  |   REACT     +----->+    WALLET     +---+--->+  SUPERSEED BLOCKCHAIN  |
+|  |  INTERFACE  |      |  CONTROLLER   |   |    |                         |
+|  |             |      |               |   |    |                         |
+|  +------+------+      +-------+-------+   |    |                         |
+|         ^                     ^           |    |                         |
+|         |                     |           |    |                         |
+|         v                     v           |    |                         |
+|  +------+------+      +-------+-------+   |    |                         |
+|  |             |      |               |   |    |                         |
+|  |    REACT    |      |   SECURITY    |   |    |                         |
+|  |  CONTEXTS   |      |    MODULES    |   |    |                         |
+|  |             |      |               |   |    |                         |
+|  +------+------+      +-------+-------+   |    |                         |
+|         ^                     ^           |    |                         |
+|         |                     |           |    |                         |
+|         v                     v           |    |                         |
+|  +------+------+      +-------+-------+   |    |                         |
+|  |             |      |               |   |    |                         |
+|  |  UTILITIES  |      |   ENCRYPTED   |   |    |                         |
+|  |             |      |    STORAGE    |   |    |                         |
+|  +-------------+      +---------------+   |    |                         |
+|                                           |    |                         |
++-------------------------------------------+    +-------------------------+
+```
+
+Key components:
+- **React Interface**: UI components and presentation logic
+- **Wallet Controller**: Wallet management and blockchain operations
+- **React Contexts**: Global state and data management in the application
+- **Security Modules**: Encryption, authentication, and data protection
+- **Utilities**: Helper functions for various operations
+- **Encrypted Storage**: Secure persistence of sensitive data
+
+## 🛠️ Technologies
+
+- **Frontend**: React 18.2
+- **Styling**: TailwindCSS 3.3
+- **Bundler**: Vite 4.4
+- **Blockchain**: ethers.js 5.7
+- **Storage**: IndexedDB (idb 7.1)
+- **UI Components**: Optimized custom components
+
+## 📋 Requirements
+
+- Node.js 14 or higher
+- npm 7 or higher
+- Modern browser with Web Crypto API support
+
+## 💻 Installation and Development
+
+### Initial Setup
+
+1. Clone the repository:
+```bash
 git clone https://github.com/yourusername/SuperSafe.git
 cd SuperSafe
 ```
 
-2. Instala las dependencias:
-```
+2. Install dependencies:
+```bash
 npm install
 ```
 
-3. Inicia el servidor de desarrollo:
-```
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-### Construir para producción
+The application will be available at `http://localhost:5173`.
 
+### Main Commands
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production version
+npm run preview
 ```
+
+### Build for Production
+
+```bash
 npm run build
 ```
 
-La extensión empaquetada estará en la carpeta `dist`.
+The generated files will be in the `dist` folder.
 
-### Cargar la extensión en Chrome
+### Using as a Chrome Extension
 
-1. Abre Chrome y navega a `chrome://extensions/`
-2. Habilita el "Modo de desarrollador" (toggle en la parte superior derecha)
-3. Haz clic en "Cargar descomprimida" y selecciona la carpeta `dist`
+1. Run `npm run build` to generate the production version
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode" (toggle in the top right)
+4. Click on "Load unpacked" and select the `dist` folder
 
-## Licencia
+## 📚 Documentation
 
-[MIT](LICENSE)
+- [DOCUMENTATION.md](DOCUMENTATION.md) - Complete technical documentation
+- [USER_GUIDE.md](USER_GUIDE.md) - Detailed user guide
+- [SECURITY.md](SECURITY.md) - Information about the security model
+
+## 🛣️ Roadmap
+
+Here are some planned developments for upcoming versions:
+
+### Upcoming Features
+
+- **NFT Support**: View and manage non-fungible tokens (ERC-721/ERC-1155)
+- **dApp Integration**: Direct connection with decentralized applications
+- **Push Notifications**: Alerts for received transactions and network changes
+- **Advanced Backup Options**: Multiple mechanisms for wallet backups
+- **Hardware Wallet Support**: Integration with Ledger and Trezor
+
+### Technical Improvements
+
+- **Performance Optimization**: Reduction of loading times and resource consumption
+- **Security Improvements**: Regular audits and reviews
+- **Multi-language Support**: Complete internationalization of the application
+- **Automated Testing**: Expansion of test coverage
+- **TypeScript Migration**: Improved type system for greater robustness
+
+## 🤝 Contribution
+
+Contributions are welcome. Please read our contribution guide before submitting a pull request.
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
