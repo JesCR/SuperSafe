@@ -1,6 +1,6 @@
 # SuperSafe Wallet
 
-![SuperSafe Logo](public/logo.png)
+![(public/logo.png)](https://github.com/JesCR/SuperSafe/blob/main/public/SuperSafe_2line.png)
 
 A secure digital wallet for managing assets on the SuperSeed blockchain, with an architecture focused on security and user experience.
 
