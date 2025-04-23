@@ -4,6 +4,8 @@
 
 A secure digital wallet for managing assets on the SuperSeed blockchain, with an architecture focused on security and user experience.
 
+**Documentation:** [Technical Documentation](DOCUMENTATION.md) | [Security Model](SECURITY.md) | [User Guide](USER_GUIDE.md)
+
 ## 🚀 Key Features
 
 - **Multi-network**: Compatible with SuperSeed Mainnet (ID 5330) and Devnet Sepolia (ID 53302)
