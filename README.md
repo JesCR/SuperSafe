@@ -6,8 +6,7 @@ A secure digital wallet for managing assets on the SuperSeed blockchain, with an
 
 **Documentation:** [Technical Documentation](DOCUMENTATION.md) | [Security Model](SECURITY.md) | [User Guide](USER_GUIDE.md)
 
-**Demo:** [Watch Demo Video](https://github.com/JesCR/SuperSafe/blob/main/public/SuperSafe_wallet_mvp.mp4)
-
+**Demo:** [![Watch the video](https://i.sstatic.net/Vp2cE.png)](https://youtu.be/xV-3PIRnCN8)
 ## 🚀 Key Features
 
 - **Multi-network**: Compatible with SuperSeed Mainnet (ID 5330) and Devnet Sepolia (ID 53302)
