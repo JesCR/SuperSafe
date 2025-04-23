@@ -1,0 +1,203 @@
+[
+    {
+      "name": "Velodrome",
+      "url": "https://velodrome.finance",
+      "summary": "The central trading & liquidity marketplace on Superchain",
+      "logo_url": "public/ecosystem/car_velodrome.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "BulletX",
+      "url": "https://bulletx.finance",
+      "summary": "One Stop DeFi Hub on Superseed",
+      "logo_url": "public/ecosystem/car_bulletx.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "SeedFi",
+      "url": "https://seedfi.trade/",
+      "summary": "The pioneering native one-stop trading platform, offers AMM swap + perp trade + meme launch, built on Superseed",
+      "logo_url": "public/ecosystem/car_seedfi.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "Bebop",
+      "url": "https://bebop.fi",
+      "summary": "Bebop brings enhanced liquidity and trading solutions to the DeFi space through its app and API suite.",
+      "logo_url": "public/ecosystem/car_bebop.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "Ionic",
+      "url": "https://ionicprotocol.com",
+      "summary": "Ionic Protocol is an OP Superchain-native modular, composable money market.",
+      "logo_url": "public/ecosystem/car_ionic.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "Mintpad",
+      "url": "https://mintpad.io",
+      "summary": "Mintpad is the easiest way to launch your digital collection.",
+      "logo_url": "public/ecosystem/car_mintpad.webp",
+      "category": "NFT",
+      "status": "LIVE"
+    },
+    {
+      "name": "Fractal Visions",
+      "url": "https://fractalvisions.xyz",
+      "summary": "A supercharged superchain impact initiative platform.",
+      "logo_url": "public/ecosystem/car_fractal_visions.webp",
+      "category": "NFT",
+      "status": "LIVE"
+    },
+    {
+      "name": "Dolomite",
+      "url": "https://dolomite.io",
+      "summary": "DeFi's most composable money market and trading platform.",
+      "logo_url": "public/ecosystem/car_dolomite.webp",
+      "category": "DEFI",
+      "status": "SOON"
+    },
+    {
+      "name": "Stryke",
+      "url": "https://stryke.finance",
+      "summary": "Stryke offers options against concentrated liquidity on any DEX and a suite of structured products - maximizing LP yield and minimizing trader losses.",
+      "logo_url": "public/ecosystem/car_stryke.webp",
+      "category": "DEFI",
+      "status": "SOON"
+    },
+    {
+      "name": "MarginZero",
+      "url": "https://marginzero.xyz",
+      "summary": "MarginZero is a permission-less, oracle-less, and omni-chain options & protected perpetual protocol that operates across multiple chains.",
+      "logo_url": "public/ecosystem/car_marginZero.webp",
+      "category": "DEFI",
+      "status": "SOON"
+    },
+    {
+      "name": "Jones",
+      "url": "https://jones.fi",
+      "summary": "Jones is a yield, strategy, and liquidity protocol with vaults that enable 1-click access to institutional-grade strategies.",
+      "logo_url": "public/ecosystem/car_jones.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "Orange Finance",
+      "url": "https://orange.finance",
+      "summary": "Orange Finance is the leading Automated Liquidity Management Protocol for LPDfi (LP Restaking). Orange simplifies yield earning through sophisticated strategies,…",
+      "logo_url": "public/ecosystem/car_orange_finance.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "Pyth Network",
+      "url": "https://pyth.network",
+      "summary": "The Pyth Network is the largest first-party Oracle network, delivering real-time data across a vast number of chains.",
+      "logo_url": "public/ecosystem/car_pyth.svg",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Chronicle",
+      "url": "https://chronicle.so",
+      "summary": "Chronicle, the original oracle on Ethereum, is a novel decentralized oracle specializing in RWA & DeFi data.",
+      "logo_url": "public/ecosystem/car_chronicle.webp",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Goldsky",
+      "url": "https://goldsky.com",
+      "summary": "Goldsky is Web3's Realtime Data Platform. Build powerful dApps faster with premium blockchain indexing, instant subgraphs, and custom data streaming pipelines.",
+      "logo_url": "public/ecosystem/car_goldsky.webp",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Thirdweb",
+      "url": "https://thirdweb.com",
+      "summary": "Full-stack, open-source web3 development platform. Frontend, backend, and onchain tools to build complete web3 apps — on every EVM…",
+      "logo_url": "public/ecosystem/car_thirdweb.webp",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Blockscout",
+      "url": "https://blockscout.com",
+      "summary": "The Superseed Blockscout open-source explorer provides detailed information for users and helpful tools for developers.",
+      "logo_url": "public/ecosystem/car_blockscout.webp",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Sablier",
+      "url": "https://sablier.finance",
+      "summary": "Sablier provides infrastructure for token distribution. DAOs and businesses use Sablier for vesting, payroll, airdrops, and more.",
+      "logo_url": "public/ecosystem/car_sablier.svg",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "Blast API",
+      "url": "https://blastapi.io",
+      "summary": "Blast, by Bware Labs, is a dePin protocol leveraging hundreds of third-party blockchain nodes to provide one of the highest availability and fastest RPC services…",
+      "logo_url": "public/ecosystem/car_blast_api.webp",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Layerswap",
+      "url": "https://layerswap.io",
+      "summary": "Layerswap is a reliable solution for transferring crypto assets across various blockchains in a matter of minutes.",
+      "logo_url": "public/ecosystem/car_layerswap.webp",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Relay",
+      "url": "https://relaychain.io",
+      "summary": "Relay is the fastest way to move assets across chains. Built for instant execution, integrated swaps, and safe bridging anywhere onchain.",
+      "logo_url": "public/ecosystem/car_relay.webp",
+      "category": "DEFI",
+      "status": "LIVE"
+    },
+    {
+      "name": "SQD",
+      "url": "https://sqd.io",
+      "summary": "SQD is a decentralized data management platform that provides permissionless and cost-efficient access to petabytes of Web3 information.",
+      "logo_url": "public/ecosystem/car_sdq.svg",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Envio",
+      "url": "https://envio.xyz",
+      "summary": "Envio is a modern, multi-chain EVM blockchain indexing framework speed-optimized for querying real-time and historical data.",
+      "logo_url": "public/ecosystem/car_envio.svg",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    },
+    {
+      "name": "Smoovie Phone",
+      "url": "https://smoovie.io",
+      "summary": "Smoovie Phone is a line of decentralized predictions markets , 0DTE options games and a parlay platform + OTC P2P desk.",
+      "logo_url": "public/ecosystem/car_smoovie_phone.webp",
+      "category": "DEFI",
+      "status": "SOON"
+    },
+    {
+      "name": "Dune",
+      "url": "https://dune.com",
+      "summary": "Dune is a leading data analytics platform that democratizes access to blockchain data by enabling users to query, visualize, and share insights across various…",
+      "logo_url": "public/ecosystem/car_dune.webp",
+      "category": "INFRASTRUCTURE",
+      "status": "LIVE"
+    }
+  ]
+  

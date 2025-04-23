@@ -99,7 +99,7 @@ export default function SendTokenForm({ onClose, initialToken = 'ETH' }) {
           <select 
             value={tokenSymbol} 
             onChange={e => setTokenSymbol(e.target.value)} 
-            className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 border rounded focus:ring-[#18d1ce] focus:border-[#18d1ce]"
             disabled={isLoading}
           >
             <option value="ETH">ETH</option>
@@ -117,7 +117,7 @@ export default function SendTokenForm({ onClose, initialToken = 'ETH' }) {
             value={toAddress} 
             onChange={e => setToAddress(e.target.value)} 
             placeholder="0x..." 
-            className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-2 border rounded focus:ring-[#18d1ce] focus:border-[#18d1ce]"
             disabled={isLoading}
           />
         </div>
@@ -133,7 +133,7 @@ export default function SendTokenForm({ onClose, initialToken = 'ETH' }) {
               placeholder="0.0" 
               step="0.0001"
               min="0"
-              className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 border rounded focus:ring-[#18d1ce] focus:border-[#18d1ce]"
               disabled={isLoading}
             />
             <span className="absolute right-3 top-2 text-gray-500">
@@ -147,14 +147,14 @@ export default function SendTokenForm({ onClose, initialToken = 'ETH' }) {
           <div className={`mb-3 p-2 rounded text-sm ${
             status.type === 'error' ? 'bg-red-100 text-red-700' : 
             status.type === 'success' ? 'bg-green-100 text-green-700' : 
-            'bg-blue-100 text-blue-700'
+            'bg-[#18d1ce]/10 text-[#16beb8]'
           }`}>
             <div className="flex justify-between items-center">
               <span>{status.message}</span>
               {status.txHash && (
                 <button 
                   onClick={() => viewTransaction(status.txHash)}
-                  className="text-blue-600 hover:text-blue-800 underline text-xs"
+                  className="text-[#18d1ce] hover:text-[#16beb8] underline text-xs"
                 >
                   View
                 </button>
@@ -168,13 +168,28 @@ export default function SendTokenForm({ onClose, initialToken = 'ETH' }) {
           <button 
             type="submit"
             disabled={isLoading}
-            className={`flex-1 py-2 px-4 rounded font-medium ${
+            className={`flex-1 py-2 px-4 rounded font-medium flex items-center justify-center ${
               isLoading 
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-[#18d1ce] text-white hover:bg-[#16beb8]'
             }`}
           >
-            {isLoading ? 'Sending...' : 'Send'}
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Sending...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Send
+              </>
+            )}
           </button>
           <button 
             type="button"

@@ -1,96 +1,196 @@
-import { openDB } from 'idb';
+// Helper functions for storing and retrieving data from localStorage
 
-// Abrir una base de datos para la extensión (si no existe, crearla)
-const dbPromise = openDB('SuperSeedWalletDB', 1, {
-  upgrade(db) {
-    // Almacén para las billeteras
-    db.createObjectStore('wallets', { keyPath: 'id', autoIncrement: true });
-    // Almacén para configuraciones
-    db.createObjectStore('settings', { keyPath: 'id' });
-  }
-});
-
-// Guardar la matriz de billeteras en el almacenamiento
-export async function saveWallets(wallets) {
+// Save wallets to localStorage
+export const saveWallets = (wallets) => {
   try {
-    const db = await dbPromise;
-    const tx = db.transaction('wallets', 'readwrite');
-    // Limpiar el almacén existente y volver a agregar todo
-    await tx.objectStore('wallets').clear();
-    for (const [index, w] of wallets.entries()) {
-      await tx.objectStore('wallets').add({ id: index, ...w });
-    }
-    await tx.done;
+    localStorage.setItem('wallets', JSON.stringify(wallets));
     return true;
   } catch (error) {
-    console.error("Error al guardar las billeteras:", error);
+    console.error('Error saving wallets:', error);
     return false;
   }
-}
+};
 
-// Cargar billeteras desde el almacenamiento
-export async function loadWallets() {
+// Load wallets from localStorage
+export const loadWallets = () => {
   try {
-    const db = await dbPromise;
-    const tx = db.transaction('wallets', 'readonly');
-    const store = tx.objectStore('wallets');
-    const all = await store.getAll();
-    await tx.done;
-    
-    // Devolvemos los registros sin el campo ID
-    return all.map(record => {
-      const { id, ...wallet } = record;
-      return wallet;
-    });
+    const walletsData = localStorage.getItem('wallets');
+    if (!walletsData) return [];
+    return JSON.parse(walletsData);
   } catch (error) {
-    console.error("Error al cargar las billeteras:", error);
+    console.error('Error loading wallets:', error);
     return [];
   }
-}
+};
 
-// Guardar configuración específica
-export async function saveSetting(key, value) {
+// Hash a password using PBKDF2
+export const hashPassword = async (password) => {
   try {
-    const db = await dbPromise;
-    const tx = db.transaction('settings', 'readwrite');
-    await tx.objectStore('settings').put({ id: key, value });
-    await tx.done;
-    return true;
+    const encoder = new TextEncoder();
+    const passwordData = encoder.encode(password);
+    
+    // Generar un salt aleatorio
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    
+    // Importar la contraseña como clave
+    const keyMaterial = await window.crypto.subtle.importKey(
+      'raw',
+      passwordData,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
+    
+    // Derivar bits usando PBKDF2
+    const iterations = 210000; // Un número alto de iteraciones para hacer más lento el proceso
+    const hashBuffer = await window.crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt,
+        iterations,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      256 // 256 bits
+    );
+    
+    // Convertir a formato string para almacenamiento
+    const hashArray = new Uint8Array(hashBuffer);
+    
+    // Combinar salt y hash
+    const result = new Uint8Array(salt.length + hashArray.length);
+    result.set(salt, 0);
+    result.set(hashArray, salt.length);
+    
+    // Convertir a Base64 para almacenamiento
+    return btoa(String.fromCharCode.apply(null, result));
   } catch (error) {
-    console.error(`Error al guardar configuración ${key}:`, error);
+    console.error('Error hashing password:', error);
+    throw error;
+  }
+};
+
+// Verify a password against a stored hash
+export const verifyPassword = async (password, storedHash) => {
+  try {
+    if (!storedHash) return false;
+    
+    // Decodificar el hash almacenado
+    const storedData = Uint8Array.from(atob(storedHash), c => c.charCodeAt(0));
+    
+    // Extraer el salt (primeros 16 bytes)
+    const salt = storedData.slice(0, 16);
+    const storedHashPart = storedData.slice(16);
+    
+    // Repetir el proceso de hash con el mismo salt
+    const encoder = new TextEncoder();
+    const passwordData = encoder.encode(password);
+    
+    // Importar la contraseña como clave
+    const keyMaterial = await window.crypto.subtle.importKey(
+      'raw',
+      passwordData,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    );
+    
+    // Derivar bits usando PBKDF2 con el mismo salt y parámetros
+    const iterations = 210000;
+    const hashBuffer = await window.crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt,
+        iterations,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      256
+    );
+    
+    // Convertir a array para comparación
+    const hashArray = new Uint8Array(hashBuffer);
+    
+    // Comparar los hashes (comparación de tiempo constante)
+    if (hashArray.length !== storedHashPart.length) {
+      return false;
+    }
+    
+    // Comparación resistente a timing attacks
+    let result = 0;
+    for (let i = 0; i < hashArray.length; i++) {
+      result |= hashArray[i] ^ storedHashPart[i];
+    }
+    
+    return result === 0;
+  } catch (error) {
+    console.error('Error verifying password:', error);
     return false;
   }
-}
+};
 
-// Cargar configuración específica
-export async function loadSetting(key) {
+// Save a setting to localStorage
+export const saveSetting = async (key, value) => {
   try {
-    const db = await dbPromise;
-    const value = await db.get('settings', key);
-    return value ? value.value : null;
+    localStorage.setItem(`setting_${key}`, JSON.stringify(value));
+    return true;
   } catch (error) {
-    console.error(`Error al cargar configuración ${key}:`, error);
+    console.error(`Error saving setting ${key}:`, error);
+    return false;
+  }
+};
+
+// Load a setting from localStorage
+export const loadSetting = async (key) => {
+  try {
+    const data = localStorage.getItem(`setting_${key}`);
+    if (!data) return null;
+    return JSON.parse(data);
+  } catch (error) {
+    console.error(`Error loading setting ${key}:`, error);
     return null;
   }
-}
+};
 
-// Cargar todas las configuraciones
-export async function loadAllSettings() {
+// Load all settings with a specific prefix
+export const loadAllSettings = async (prefix = 'setting_') => {
   try {
-    const db = await dbPromise;
-    const tx = db.transaction('settings', 'readonly');
-    const store = tx.objectStore('settings');
-    const all = await store.getAll();
-    await tx.done;
-    
     const settings = {};
-    all.forEach(item => {
-      settings[item.id] = item.value;
-    });
-    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(prefix)) {
+        const actualKey = key.substring(prefix.length);
+        settings[actualKey] = JSON.parse(localStorage.getItem(key));
+      }
+    }
     return settings;
   } catch (error) {
-    console.error("Error al cargar todas las configuraciones:", error);
+    console.error('Error loading all settings:', error);
     return {};
   }
-} 
+};
+
+// Clear all stored data (for logging out or resetting)
+export const clearStorage = () => {
+  try {
+    // Clear wallet-related data but keep other app settings
+    localStorage.removeItem('wallets');
+    localStorage.removeItem('setting_currentWalletIndex');
+    return true;
+  } catch (error) {
+    console.error('Error clearing storage:', error);
+    return false;
+  }
+};
+
+// Check if storage is available
+export const isStorageAvailable = () => {
+  try {
+    const test = '__storage_test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}; 

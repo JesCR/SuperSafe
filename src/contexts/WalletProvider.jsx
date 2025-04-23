@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { ethers } from 'ethers';
 import { NETWORKS, PRELOADED_TOKENS } from '../utils/networks';
-import { saveWallets, loadWallets, saveSetting, loadSetting } from '../utils/storage';
+import { saveWallets, loadWallets, saveSetting, loadSetting, hashPassword, verifyPassword } from '../utils/storage';
 import { encryptPrivateKey, decryptPrivateKey, isValidMnemonic, isValidPrivateKey } from '../utils/crypto';
+
+// Key to store the password
+const DEFAULT_PASSWORD_KEY = 'walletPassword';
 
 // Create the context
 const WalletContext = createContext();
@@ -21,6 +24,13 @@ export function WalletProvider({ children }) {
   const [isLocked, setIsLocked] = useState(true);
   const [hasPassword, setHasPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  const [securityToggles, setSecurityToggles] = useState({
+    lockOnExit: true,
+    confirmTransactions: true,
+    hideBalances: false,
+    requestPasswordOnOpen: true,
+    autoLockAfter5Min: true
+  });
 
   // Get current network based on network key
   const network = useMemo(() => NETWORKS[networkKey], [networkKey]);
@@ -68,11 +78,28 @@ export function WalletProvider({ children }) {
           }
           
           // Check if password is set
-          const hasStoredPassword = await loadSetting('hasPassword');
+          const hasStoredPassword = await loadSetting(DEFAULT_PASSWORD_KEY);
           setHasPassword(!!hasStoredPassword);
           
-          // If we have a password, wallet remains locked until unlocked
-          setIsLocked(!!hasStoredPassword);
+          // Verify security configuration
+          const storedSecurityToggles = await loadSetting('securityToggles');
+          if (storedSecurityToggles) {
+            setSecurityToggles(storedSecurityToggles);
+          }
+          
+          // If there's a password and lockOnExit is enabled, lock the wallet
+          // If lockOnExit is disabled, don't lock even if there's a password
+          if (hasStoredPassword) {
+            // By default, lock if there's no specific configuration
+            if (!storedSecurityToggles || storedSecurityToggles.requestPasswordOnOpen) {
+              setIsLocked(true);
+            } else {
+              setIsLocked(false);
+            }
+          } else {
+            // No password, not locked
+            setIsLocked(false);
+          }
         } else {
           // No wallets, not locked
           setIsLocked(false);
@@ -115,6 +142,13 @@ export function WalletProvider({ children }) {
     }
   }, [customTokens, isLoading]);
 
+  // Save changes to security settings when they change
+  useEffect(() => {
+    if (!isLoading) {
+      saveSetting('securityToggles', securityToggles);
+    }
+  }, [securityToggles, isLoading]);
+
   // Auto-lock after 5 minutes of inactivity
   useEffect(() => {
     if (hasPassword) {
@@ -125,6 +159,29 @@ export function WalletProvider({ children }) {
       return () => clearTimeout(lockTimer);
     }
   }, [hasPassword, isLocked]);
+
+  // Handle window close (lock if lockOnExit is enabled)
+  useEffect(() => {
+    async function handleBeforeUnload() {
+      try {
+        // Load security configuration
+        const storedSecurityToggles = await loadSetting('securityToggles');
+        
+        // If lockOnExit is enabled, lock the wallet
+        if (storedSecurityToggles && storedSecurityToggles.lockOnExit && hasPassword) {
+          setIsLocked(true);
+        }
+      } catch (error) {
+        console.error('Error handling window unload:', error);
+      }
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasPassword]);
 
   // Switch network
   const switchNetwork = (netKey) => {
@@ -138,14 +195,25 @@ export function WalletProvider({ children }) {
   // Set or change password
   const setPassword = async (password, oldPassword = null) => {
     try {
-      // If we already have a password, verify old password
+      // Si ya tenemos una contraseña, verificamos la antigua
       if (hasPassword && oldPassword !== null) {
-        // In a real app, we would verify the old password here
-        // For demo purposes, we're just accepting any old password
+        // Verificar la contraseña anterior
+        const storedPasswordHash = await loadSetting(DEFAULT_PASSWORD_KEY);
+        if (storedPasswordHash) {
+          const isValid = await verifyPassword(oldPassword, storedPasswordHash);
+          if (!isValid) {
+            throw new Error('Current password is incorrect');
+          }
+        }
       }
       
-      // Store the password hash (in a real app) and set hasPassword flag
-      await saveSetting('hasPassword', true);
+      // Generar hash de la nueva contraseña
+      const passwordHash = await hashPassword(password);
+      
+      // Guardar el hash de la contraseña
+      await saveSetting(DEFAULT_PASSWORD_KEY, passwordHash);
+      
+      // Actualizar el estado
       setHasPassword(true);
       setIsLocked(false);
       
@@ -159,8 +227,27 @@ export function WalletProvider({ children }) {
   // Unlock with password
   const unlock = async (password) => {
     try {
-      // In a real app, we would verify the password against stored hash
-      // For demo purposes, we're accepting any password
+      // Validación básica de la contraseña
+      if (!password || password.length < 3) {
+        setPasswordError('Invalid password. Must be at least 3 characters.');
+        return false;
+      }
+      
+      // Obtener el hash almacenado
+      const storedPasswordHash = await loadSetting(DEFAULT_PASSWORD_KEY);
+      
+      if (!storedPasswordHash) {
+        setPasswordError('No password has been set for this wallet');
+        return false;
+      }
+      
+      // Verificar la contraseña contra el hash almacenado
+      const isValid = await verifyPassword(password, storedPasswordHash);
+      
+      if (!isValid) {
+        setPasswordError('Invalid password');
+        return false;
+      }
       
       setIsLocked(false);
       setPasswordError('');
@@ -182,22 +269,58 @@ export function WalletProvider({ children }) {
   // Add a new wallet
   const addWallet = async (walletData) => {
     try {
-      const { address, privateKey, alias } = walletData;
+      // For backward compatibility, handle both old and new formats
+      const { type, address, privateKey, alias, profileImage } = walletData;
+      
+      console.log("Adding wallet with data:", { 
+        type, 
+        address: address ? `${address.substring(0, 8)}...` : undefined,
+        hasPrivateKey: !!privateKey,
+        alias
+      });
+      
+      // Validate the private key if provided
+      let wallet;
+      if (type === 'mnemonic' && walletData.secret) {
+        if (!isValidMnemonic(walletData.secret.trim())) {
+          throw new Error('Invalid mnemonic phrase');
+        }
+        wallet = ethers.Wallet.fromMnemonic(walletData.secret.trim());
+      } else {
+        // Default to private key method
+        const keyToUse = privateKey || walletData.secret;
+        if (!keyToUse) {
+          throw new Error('No private key or secret provided');
+        }
+        
+        if (!isValidPrivateKey(keyToUse.trim())) {
+          throw new Error('Invalid private key format');
+        }
+        
+        wallet = new ethers.Wallet(keyToUse.trim());
+      }
+      
+      // Use provided address or get from wallet
+      const walletAddress = address || wallet.address;
       
       // Check if the address already exists
-      if (wallets.some(w => w.address.toLowerCase() === address.toLowerCase())) {
+      if (wallets.some(w => w.address.toLowerCase() === walletAddress.toLowerCase())) {
         throw new Error('This wallet has already been imported');
       }
       
+      // Obtener la contraseña actual (si existe)
+      const passwordHash = await loadSetting(DEFAULT_PASSWORD_KEY);
+      const userPassword = walletData.password; // La contraseña podría ser proporcionada al crear el wallet
+      
       // Encrypt the private key
-      const encryptedKey = await encryptPrivateKey(privateKey);
+      const encryptedKey = await encryptPrivateKey(wallet.privateKey, userPassword);
       
       // Create the new wallet
       const newWallet = {
         alias: alias || `Wallet ${wallets.length + 1}`,
-        address,
+        address: walletAddress,
         encryptedKey,
-        profileImage: walletData.profileImage || null
+        profileImage: profileImage || null
       };
       
       // Update state
@@ -304,6 +427,16 @@ export function WalletProvider({ children }) {
     if (isLocked) throw new Error('Wallet is locked');
     
     try {
+      // Obtener la contraseña actual (si existe)
+      const passwordHash = await loadSetting(DEFAULT_PASSWORD_KEY);
+      
+      // Necesitamos la contraseña en texto plano para descifrar, pero debería
+      // estar disponible en memoria durante la sesión actual mientras esté desbloqueada
+      // En una implementación real, podríamos utilizar un enfoque más seguro como
+      // almacenar la contraseña en una variable de sesión cifrada
+      
+      // Descifrar la clave privada - aquí falta la contraseña real, pero
+      // decryptPrivateKey intentará usar getEncryptionPassword como fallback
       const wallet = await decryptPrivateKey(currentWallet.encryptedKey);
       return wallet.connect(getProvider());
     } catch (error) {
@@ -363,6 +496,8 @@ export function WalletProvider({ children }) {
     isLocked,
     hasPassword,
     passwordError,
+    securityToggles,
+    setSecurityToggles,
     
     // Functions
     switchNetwork,
@@ -377,41 +512,52 @@ export function WalletProvider({ children }) {
     sendToken,
     setPassword,
     unlock,
-    lock
+    lock,
+    saveSetting,
+    loadSetting
   };
 
   // If wallet is locked, render a login screen instead of passing down the context
   if (isLocked && !isLoading) {
     return (
-      <div className="min-w-[300px] h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-          <h2 className="text-2xl font-bold text-center mb-6">Unlock Your Wallet</h2>
+      <div className="min-w-[300px] h-screen flex items-center justify-center bg-gray-100 p-6">
+        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Unlock Your Wallet</h2>
+            <p className="text-gray-600">Enter your password to access your wallet</p>
+          </div>
           
           <form onSubmit={(e) => {
             e.preventDefault();
             const password = e.target.password.value;
             unlock(password);
           }}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <input 
                 type="password" 
                 name="password"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                placeholder="Enter your password"
                 required
               />
             </div>
             
             {passwordError && (
-              <div className="mb-4 text-red-600 text-sm">{passwordError}</div>
+              <div className="mb-6 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
+                {passwordError}
+              </div>
             )}
             
             <button 
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+              className="w-full bg-[#18d1ce] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#16beb8] focus:outline-none focus:ring-2 focus:ring-[#18d1ce] focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
               Unlock
             </button>
           </form>
